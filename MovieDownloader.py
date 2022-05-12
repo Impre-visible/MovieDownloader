@@ -1,4 +1,4 @@
-import time, os, random
+import time, os, random, sys, itertools, threading
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait,Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -46,14 +46,27 @@ service = Service("C:\chromedriver\chromedriver.exe")
 
 browser = webdriver.Chrome(options=options, service=service)
 
-print("Starting...\nDo not exit, it's normal.")
+done = False
+#here is the animation
+def animate():
+    for c in itertools.cycle(['   ', '.  ', '.. ', '...']):
+        if done:
+            break
+        print(f"\r{CGreen}Starting" + c, end=f"{CEnd}")
+        time.sleep(0.5)
+
+t = threading.Thread(target=animate)
+t.start()
+
 browser.get('https://www.wawacity.blue/')
 delay = 3 # seconds
+
 try:
     myElem = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.ID, 'main-body')))
-    print("Opened website...")
 except TimeoutException:
     print("Loading took too much time!")
+done = True
+
 
 select = Select(browser.find_element(By.XPATH, "/html/body/nav/div/div[2]/form/select"))
 inputPlace = browser.find_element(By.XPATH, "/html/body/nav/div/div[2]/form/input")
@@ -129,14 +142,13 @@ def movieSearch():
     try:
         myElem = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[3]/div[2]")))
     except TimeoutException:
-        print("Loading took too much time!")
+        print("")
     button = browser.find_element(By.XPATH, "/html/body/div[2]/div[2]/div[2]/form/div[2]/button")
     button.click()
     try:
         myElem = WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div[2]/div/ul/li/a")))
     except TimeoutException:
-        print("Loading took too much time!")
-    browser.get_screenshot_as_file("screenshot.png")
+        print("")
     link = browser.find_element(By.XPATH, "/html/body/div[2]/div[2]/div/ul/li/a")
     url = link.text
     print(f"\nThe link is {url}")
